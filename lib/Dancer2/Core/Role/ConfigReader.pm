@@ -14,7 +14,20 @@ use Dancer2::Core;
 use Dancer2::Core::Types;
 use Dancer2::FileUtils 'path';
 
-with 'Dancer2::Core::Role::HasLocation';
+with qw<
+    Dancer2::Core::Role::HasLocation
+    Dancer2::Core::Role::Hookable
+>;
+
+sub hook_aliases {
+    {
+        build_config_files  => 'core.role.configreader.after_build_config_files',
+        build_config        => 'core.role.configreader.after_build_config',
+    }
+}
+
+sub supported_hooks { values %{ shift->hook_aliases } }
+
 
 has default_config => (
     is      => 'ro',
@@ -142,6 +155,8 @@ sub _build_config_files {
         }
     }
 
+    $self->execute_hook( 'core.role.after_build_config_files', \@files );
+
     return \@files;
 }
 
@@ -160,6 +175,7 @@ sub _build_config {
     );
 
     $config = $self->_normalize_config($config);
+    $self->execute_hook( 'core.role.configreader.after_build_config', $config );
     return $config;
 }
 

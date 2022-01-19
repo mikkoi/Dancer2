@@ -139,6 +139,28 @@ If you like Apache configuration files, try something similar to:
 INI-style files are deliberately simplistic and not recommended for use in
 your Dancer2 applications.
 
+=head2 Config
+
+=over 4
+
+=item * C<build_config_files> is called after the payload has been serialized, and
+receives the serialized content as an argument.
+
+  hook build_config_files => sub {
+    my $serialized_content = shift;
+    ...
+  };
+
+=item * C<build_config> is called before serializing the content, and receives
+the content to serialize as an argument.
+
+  hook build_config => sub {
+    my $content = shift;
+    ...
+  };
+
+=back
+
 =head1 SUPPORTED SETTINGS
 
 =head2 Run mode and listening interface/port
