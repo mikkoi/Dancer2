@@ -299,7 +299,7 @@ Gets the location from the configuration. Same as C<< $object->location >>.
 
 =attr environments_location
 
-Gets the directory were the environment files are stored.
+Gets the directory where the environment files are stored.
 
 =attr config
 
