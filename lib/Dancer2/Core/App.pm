@@ -767,6 +767,7 @@ sub supported_hooks {
       core.app.route_exception
       core.app.before_file_render
       core.app.after_file_render
+      core.app.after_build_config
       core.error.before
       core.error.after
       core.error.init
@@ -790,6 +791,7 @@ sub hook_aliases {
         before_handler_file_render => 'handler.file.before_render',
         after_handler_file_render  => 'handler.file.after_render',
 
+        build_config        => 'core.app.after_build_config',
 
         # compatibility from Dancer1
         before_error_render    => 'core.error.before',
@@ -835,7 +837,9 @@ sub register_plugin {
 # This method overrides the default one from Role::ConfigReader
 sub settings {
     my $self = shift;
-    +{ %{ Dancer2::runner()->config }, %{ $self->config } };
+    my $config = +{ %{ Dancer2::runner()->config }, %{ $self->config } };
+    $self->execute_hook( 'core.app.after_build_config', $config );
+    return $config;
 }
 
 sub cleanup {
