@@ -91,7 +91,7 @@ has global_triggers => (
             },
         };
 
-        no warnings 'once'; # Name "Dancer2::runner" used only once: possible typo
+        no warnings 'once'; # Disable: Name "Dancer2::runner" used only once: possible typo
         my $runner_config = defined $Dancer2::runner
                             ? Dancer2->runner->config
                             : {};
@@ -143,9 +143,9 @@ sub _build_config {
 sub _build_config_readers {
     my ($self) = @_;
 
-    my @config_reader_names = qw/
-        Dancer2::ConfigReader::FileSimple
-    /;
+    my @config_reader_names = $ENV{'DANCER_CONFIG_READERS'}
+                            ? (split qr{\s,\s}msx, $ENV{'DANCER_CONFIG_READERS'})
+                            : ( q{Dancer2::ConfigReader::FileSimple} );
 
     return [ map {
         use_module($_)->new(
@@ -249,12 +249,6 @@ sub _compile_config_entry {
     return $trigger->( $self, $value, $config );
 }
 
-# sub _run_config_reader {
-#     my ($self, $mod_name) = @_;
-#     my $cfg_rdr = use_module($mod_name)->new();
-#     return $cfg_rdr->read_config();
-# }
-#
 1;
 
 __END__

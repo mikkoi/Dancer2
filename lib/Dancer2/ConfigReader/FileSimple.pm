@@ -14,49 +14,13 @@ use Dancer2::Core;
 use Dancer2::Core::Types;
 use Dancer2::FileUtils 'path';
 
-# with 'Dancer2::Core::Role::ConfigReader';
+with 'Dancer2::Core::Role::ConfigReader';
 
 has name => (
     is      => 'ro',
     isa     => Str,
     lazy    => 0,
     default => sub {'FileSimple'},
-);
-
-has location => (
-    is      => 'ro',
-    # builder => '_build_location',
-    # lazy    => 0,
-    required => 1,
-);
-
-has config_location => (
-    is      => 'ro',
-    isa     => ReadableFilePath,
-    lazy    => 1,
-    default => sub { $ENV{DANCER_CONFDIR} || $_[0]->location },
-);
-
-# The type for this attribute is Str because we don't require
-# an existing directory with configuration files for the
-# environments.  An application without environments is still
-# valid and works.
-has environments_location => (
-    is      => 'ro',
-    isa     => Str,
-    lazy    => 1,
-    default => sub {
-        # warn "environments_location: " . $_[0]->location;
-        $ENV{DANCER_ENVDIR}
-          || File::Spec->catdir( $_[0]->config_location, 'environments' )
-          || File::Spec->catdir( $_[0]->location,        'environments' );
-    },
-);
-
-has environment => (
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
 );
 
 has config_files => (
@@ -113,14 +77,14 @@ sub read_config {
     my $config = Hash::Merge::Simple->merge(
         map {
             warn "Merging config file $_\n" if $ENV{DANCER_CONFIG_VERBOSE};
-            $self->load_config_file($_) 
+            $self->_load_config_file($_) 
         } @{ $self->config_files }
     );
 
     return $config;
 }
 
-sub load_config_file {
+sub _load_config_file {
     my ( $self, $file ) = @_;
     my $config;
 
@@ -170,7 +134,7 @@ Gets the directory where the environment files are stored.
 
 Returns the whole configuration.
 
-=attr environments
+=attr environment
 
 Returns the name of the environment.
 
@@ -180,6 +144,6 @@ List of all the configuration files.
 
 =head1 METHODS
 
-=head2 load_config_file
+=head2 read_config
 
 Load the configuration files.

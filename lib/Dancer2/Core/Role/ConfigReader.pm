@@ -14,8 +14,6 @@ use Dancer2::Core;
 use Dancer2::Core::Types;
 use Dancer2::FileUtils 'path';
 
-with 'Dancer2::Core::Role::HasLocation';
-
 has config_location => (
     is      => 'ro',
     isa     => ReadableFilePath,
@@ -38,33 +36,42 @@ has environments_location => (
     },
 );
 
+# It is required to get environment from the caller.
+# Environment should be passed down from Dancer2::Core::App.
 has environment => (
     is       => 'ro',
     isa      => Str,
     required => 1,
 );
 
-sub _normalize_config {
-    my ( $self, $config ) = @_;
+# It is required to get location from the caller.
+has location => (
+    is       => 'ro',
+    isa      => ReadableFilePath,
+    required => 1,
+);
 
-    foreach my $key ( keys %{$config} ) {
-        my $value = $config->{$key};
-        $config->{$key} = $self->_normalize_config_entry( $key, $value );
-    }
-    return $config;
-}
-
-sub _compile_config {
-    my ( $self, $config ) = @_;
-
-    foreach my $key ( keys %{$config} ) {
-        my $value = $config->{$key};
-        $config->{$key} =
-          $self->_compile_config_entry( $key, $value, $config );
-    }
-    return $config;
-}
-
+# sub _normalize_config {
+#     my ( $self, $config ) = @_;
+#
+#     foreach my $key ( keys %{$config} ) {
+#         my $value = $config->{$key};
+#         $config->{$key} = $self->_normalize_config_entry( $key, $value );
+#     }
+#     return $config;
+# }
+#
+# sub _compile_config {
+#     my ( $self, $config ) = @_;
+#
+#     foreach my $key ( keys %{$config} ) {
+#         my $value = $config->{$key};
+#         $config->{$key} =
+#           $self->_compile_config_entry( $key, $value, $config );
+#     }
+#     return $config;
+# }
+#
 1;
 
 __END__
@@ -114,18 +121,7 @@ Returns the name of the environment.
 
 =head1 METHODS
 
-=head2 settings
+=head2 read_config
 
-Alias for config. Equivalent to <<$object->config>>.
-
-=head2 setting
-
-Get or set an element from the configuration.
-
-=head2 has_setting
-
-Verifies that a key exists in the configuration.
-
-=head2 load_config_file
-
-Load the configuration files.
+Load the configuration.
+Whatever source the config comes from, files, env vars, etc.
