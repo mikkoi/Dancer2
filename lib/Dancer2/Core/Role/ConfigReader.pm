@@ -51,34 +51,13 @@ has location => (
     required => 1,
 );
 
-# sub _normalize_config {
-#     my ( $self, $config ) = @_;
-#
-#     foreach my $key ( keys %{$config} ) {
-#         my $value = $config->{$key};
-#         $config->{$key} = $self->_normalize_config_entry( $key, $value );
-#     }
-#     return $config;
-# }
-#
-# sub _compile_config {
-#     my ( $self, $config ) = @_;
-#
-#     foreach my $key ( keys %{$config} ) {
-#         my $value = $config->{$key};
-#         $config->{$key} =
-#           $self->_compile_config_entry( $key, $value, $config );
-#     }
-#     return $config;
-# }
-#
 1;
 
 __END__
 
 =head1 DESCRIPTION
 
-This is the redesigned Dancer2::Core::Role to manage
+This is a redesigned Dancer2::Core::Role to manage
 the Dancer2 configuration. Unlike earlier when config
 was read from files at the start of the web app,
 now config can be reread at a request. Also config is

@@ -117,6 +117,8 @@ sub _build_config_files {
     my ($self) = @_;
 
     return [ map {
+            # use Data::Dumper;
+            # warn Dumper $_;
             warn "Merging config_files from @{[ $_->name() ]}\n" if $ENV{DANCER_CONFIG_VERBOSE};
             @{ $_->config_files() }
         } @{ $self->config_readers }
@@ -131,6 +133,8 @@ sub _build_config {
     my $config = Hash::Merge::Simple->merge(
         $default,
         map {
+            # use Data::Dumper;
+            # warn Dumper $_;
             warn "Merging config from @{[ $_->name() ]}\n" if $ENV{DANCER_CONFIG_VERBOSE};
             $_->read_config()
         } @{ $self->config_readers }
@@ -144,7 +148,8 @@ sub _build_config_readers {
     my ($self) = @_;
 
     my @config_reader_names = $ENV{'DANCER_CONFIG_READERS'}
-                            ? (split qr{\s,\s}msx, $ENV{'DANCER_CONFIG_READERS'})
+                            # ? (split qr{ [\s]{0,} (:? [,\s]{1} ) [\s]{0,} }msx, $ENV{'DANCER_CONFIG_READERS'})
+                            ? (split qr{ [[:space:]]{1,} }msx, $ENV{'DANCER_CONFIG_READERS'})
                             : ( q{Dancer2::ConfigReader::FileSimple} );
 
     return [ map {
@@ -255,21 +260,35 @@ __END__
 
 =head1 DESCRIPTION
 
-This is the redesigned Dancer2::Core::Role to manage
-the Dancer2 configuration. Unlike earlier when config
-was read from files at the start of the web app,
-now config can be reread at a request. Also config is
-not created at the time of reading the class.
+This is the redesigned C<Dancer2::Core::Role::ConfigReader>
+to manage the Dancer2 configuration.
 
-This new behaviour makes it possible to attach plugins
-via hooks to influence config reading.
+It is now possible for user to control which B<ConfigReader>
+class to use to create the config.
 
-It also becomes possible to reload configuration without
-restarting the app.
+Use C<DANCER_CONFIG_READERS> environment variable to define
+which class or classes you want.
+
+    DANCER_CONFIG_READERS='Dancer2::ConfigReader::FileSimple Dancer2::ConfigReader::CustomConfig'
+
+If you want several, separate them with whitespace.
+Configs are read in left-to-write order where the previous
+config items get overwritten by subsequent ones.
+
+You can create your own custom B<ConfigReader>.
+The default is to use C<Dancer2::ConfigReader::FileSimple>
+which was the only way to read config files earlier.
+
+If you want, you can also extend class C<Dancer2::ConfigReader::FileSimple>.
+Here is an example where environment variables are used
+to augment the file configurations.
+
+    package Dancer2::ConfigReader::FileExtended;
+
 
 Provides a C<config> attribute that - when accessing
-the first time - feeds itself by finding and parsing
-configuration files.
+the first time - feeds itself by executing one or more
+B<ConfigReader> packages.
 
 Also provides a C<setting()> method which is supposed to be used by externals to
 read/write config entries.
@@ -298,7 +317,8 @@ Returns the name of the environment.
 
 =attr config_files
 
-List of all the configuration files.
+List of all the configuration files. This information
+is queried from the B<ConfigReader> classes.
 
 =head1 METHODS
 

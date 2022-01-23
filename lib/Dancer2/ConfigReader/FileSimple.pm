@@ -30,6 +30,19 @@ has config_files => (
     builder => '_build_config_files',
 );
 
+sub read_config {
+    my ($self) = @_;
+
+    my $config = Hash::Merge::Simple->merge(
+        map {
+            warn "Merging config file $_\n" if $ENV{DANCER_CONFIG_VERBOSE};
+            $self->_load_config_file($_) 
+        } @{ $self->config_files }
+    );
+
+    return $config;
+}
+
 sub _build_config_files {
     my ($self) = @_;
 
@@ -71,19 +84,6 @@ sub _build_config_files {
     return \@files;
 }
 
-sub read_config {
-    my ($self) = @_;
-
-    my $config = Hash::Merge::Simple->merge(
-        map {
-            warn "Merging config file $_\n" if $ENV{DANCER_CONFIG_VERBOSE};
-            $self->_load_config_file($_) 
-        } @{ $self->config_files }
-    );
-
-    return $config;
-}
-
 sub _load_config_file {
     my ( $self, $file ) = @_;
     my $config;
@@ -102,21 +102,20 @@ sub _load_config_file {
     return $config;
 }
 
-# private
-
 1;
 
 __END__
 
 =head1 DESCRIPTION
 
-Provides a C<config> attribute that feeds itself by finding and parsing
-configuration files.
-
-Also provides a C<setting()> method which is supposed to be used by externals to
-read/write config entries.
+This class provides the same features to read configuration files
+which was earlier done by C<Dancer2::Core::Role::Config>.
 
 =head1 ATTRIBUTES
+
+=attr name
+
+The name of the class.
 
 =attr location
 
@@ -129,10 +128,6 @@ Gets the location from the configuration. Same as C<< $object->location >>.
 =attr environments_location
 
 Gets the directory where the environment files are stored.
-
-=attr config
-
-Returns the whole configuration.
 
 =attr environment
 
